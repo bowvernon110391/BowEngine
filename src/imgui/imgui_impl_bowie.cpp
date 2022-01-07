@@ -329,7 +329,7 @@ static void Imgui_ImplBowie_SetupRenderState(int fb_width, int fb_height, ImDraw
 	BowieData* bd = ImGui_ImplBowie_GetBackendData();
 
 	IM_ASSERT(bd && bd->fontShader && "NO FONT SHADER LOADED!");
-	//IM_ASSERT(bd->fontTexture && "NO FONT TEXTURE LOADED!");
+	IM_ASSERT(bd->fontTexture && "NO FONT TEXTURE LOADED!");
 
 	// setup gl state
 	glEnable(GL_BLEND);
@@ -360,7 +360,7 @@ static void Imgui_ImplBowie_SetupRenderState(int fb_width, int fb_height, ImDraw
 
 	// setup shader
 	bd->fontShader->bind();
-	//bd->fontShaderInput->setupData(bd->fontShader);
+	bd->fontShaderInput->setupData(bd->fontShader);
 	// projection matrix
 	//glUniformMatrix4fv(bd->fontShader->getUniformLocation(Shader::UniformLoc::m_projection), 1, false, glm::value_ptr(projMat));
 	glUniformMatrix4fv(bd->fontShader->getUniformLocation(Shader::UniformLoc::m_projection), 1, false, &ortho_projection[0][0]);
@@ -569,7 +569,7 @@ static void ImGui_ImplBowie_RenderWindow(ImGuiViewport* v, void* d) {
 
 	// if window specify render clear, clear it
 	if (!(v->Flags & ImGuiViewportFlags_NoRendererClear)) {
-		glClearColor(0.f, 0.f, 0.f, 1.f);
+		glClearColor(0.4f, 0.f, 0.5f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 	ImGui_ImplBowie_RenderDrawData(v->DrawData);

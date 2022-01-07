@@ -65,7 +65,7 @@ void MaterialInput::setupData(const Shader* shd) const
 #endif // _DEBUG
 
 	int texture_slot = 0;
-	int u_loc;
+	int u_loc = -1;
 	// just iterate all over the param, and send value
 	for (const ShaderParam& p : inputs) {
 		// skip invalid uniforms
@@ -100,8 +100,6 @@ void MaterialInput::setupData(const Shader* shd) const
 			glUniform3fv(u_loc, 1, glm::value_ptr(p.value.vec4));
 			break;
 		}
-
-		++texture_slot;
 	}
 
 #ifdef _DEBUG_MATERIAL_INPUT
