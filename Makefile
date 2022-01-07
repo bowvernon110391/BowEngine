@@ -25,13 +25,13 @@ endif
 all:
 #	@echo $(SDL_CFL)
 	@echo compiling on: $(OS), $(GL_CFL)
-	g++ -m64 $(CFLAGS) src/*.cpp src/imgui/*.cpp src/glad/src/glad.c -o $(BIN_DIR)/$(EXE_FILENAME) $(SDL_CFL) $(GL_CFL)
+	g++ -m64 $(CFLAGS) src/engine/*.cpp src/imgui/*.cpp src/glad/src/glad.c -o $(BIN_DIR)/$(EXE_FILENAME) $(SDL_CFL) $(GL_CFL)
 
 debug:
 	make "BUILD=debug"
 
 clean:
-	$(RM) $(BIN_DIR)/*.exe
+	$(RM) $(BIN_DIR)/$(EXE_FILENAME)
 
 run:
 	@echo running executables...
