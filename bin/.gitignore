@@ -1,0 +1,9 @@
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.suo
+*.iobj
+*.ipdb
+sdlgame
+
