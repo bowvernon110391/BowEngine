@@ -51,11 +51,15 @@ void App::createWindow() {
     // SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     if (bUseGLES) {
         SDL_Log("Forcing GLES Context for embedded thing...");
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     }
     else {
         SDL_Log("Forcing core context OpenGL 2.1");
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     }
@@ -68,10 +72,11 @@ void App::createWindow() {
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
     // ANTI ALIASING
-     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
     // set hint
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeRight");
@@ -95,21 +100,22 @@ void App::createWindow() {
     }
     SDL_Log("GLAD context initialized!");
 
+	SDL_GL_MakeCurrent(wndApp, glCtx);
     // create renderer that is hardware accelerated and support render to texture
-    renderer = SDL_CreateRenderer(wndApp, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+    //renderer = SDL_CreateRenderer(wndApp, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 
-    if (!renderer) {
-        SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Renderer creation failed: %s", SDL_GetError());
-    }
-    else {
-        // vsync stuffs?
-        if (SDL_GL_SetSwapInterval(1) < 0) {
-            SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to enable vsync: %s", SDL_GetError());
-        }
-        else {
-            SDL_Log("Vsync enabled.");
-        }
-    }
+	// vsync stuffs?
+	if (SDL_GL_SetSwapInterval(1) < 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to enable vsync: %s", SDL_GetError());
+	}
+	else {
+		SDL_Log("Vsync enabled.");
+	}
+    //if (!renderer) {
+        //SDL_LogError(SDL_LOG_CATEGORY_RENDER, "Renderer creation failed: %s", SDL_GetError());
+    //}
+    //else {
+    //}
 }
 
 void App::pollEvent() {
