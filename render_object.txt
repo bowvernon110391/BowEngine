@@ -1,0 +1,29 @@
+so, a renderable has:
+- ptr to Mesh
+- ptr to Submesh
+- ptr to Shader
+- ptr to ShaderData
+- ptr to RenderObj
+
+
+- renderObj is custom, basically has:
+-- Mesh
+-- MaterialSet
+-- UniqueData
+-- METHOD: setupData(Shader*, RenderPass* pass)
+
+RenderPass:
+-- METHOD: setupData(Shader*)
+-- for each Renderable r:
+--- SetupData(r->shader)
+--- r->shaderData->SetupData(r->shader, this)
+--- r->renderObj->SetupData(r->shader, this)
+--- r->mesh->bind()
+--- setupVertexState()
+--- setupVertexArray()
+--- drawCall()
+
+Draw(vector<obj>) becomes:
+- for each obj:
+-- CALL: obj->fillRenderables(bucket)	// bucket is provided by renderpass
+

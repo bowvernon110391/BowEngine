@@ -1,0 +1,20 @@
+kd-tree algorithm:
+- for each triangle:
+-- find leaf node:
+-- insert to that node
+
+
+node-insertion logic:
+- add
+- if triangle_count > threshold && depth < limit:
+-- split()
+- else 
+-- add to it :(
+
+
+splitting logic:
+- find splitting plane
+- make left and right
+- for each triangle in us:
+-- pick most suitable node, and insert to that node
+- clear our triangle vector

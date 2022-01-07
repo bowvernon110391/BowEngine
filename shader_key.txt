@@ -1,0 +1,20 @@
+shader key:
+- source_id (the raw source, from shader library)
+- shader handled features:
+	- handle_lighttype_dir
+	- handle_lighttype_point
+	- handle_lighttype_spot
+	- handle_ambient
+	- handle_emission
+	- handle_unlit
+	- handle_alpha_cutout
+	- handle_alpha_blending
+	- handle_alpha_opaque (default, no need?)
+	- handle_vertex_skinning
+	
+- object feature:
+	- is_lit (ambient, lighttype_x) / is_unlit
+	- is_emissive (showed up in emission pass)
+	- is_skinned
+	- is_reflected (showed up in reflection map)
+	- is_opaque ? is_transparent = (is_alpha_cutout / is_alpha_blend)

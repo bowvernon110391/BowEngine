@@ -1,0 +1,30 @@
+Large Mesh File structure
+- kd-tree structure
+- mesh data and which nodes contains it
+- settings for splitting:
+	- max triangle/indices?
+	- max depth
+
+KDTreeNode:
+- AABB bbox
+- parent
+- id
+- child[2]
+- data
+
+data = BCF Mesh
+
+Steps:
+1. split the mesh into kdtreenodes
+2. build buffers for them like BCFMesh
+3. save the mesh first
+4. save the node last, referring to mesh data
+
+Splitting logic:
+- collect triangles first
+- now build the mesh data:
+-- store unique verts
+-- build new indices?
+
+TODO:
+- shrinkwrap child nodes (so initially no aabb for child node)

@@ -1,0 +1,57 @@
+#pragma once
+
+enum GeomType {
+	STATIC = 0,
+	SKINNED,
+	BILLBOARD
+};
+
+enum OpacityType {
+	OPAQUE = 0,
+	ALPHA_CLIP,
+	ALPHA_BLEND
+};
+
+enum LightingStage {
+	NONE = 0,
+
+	AMBIENT_STAGE = (1 << 0),
+	DIFFUSE_SPECULAR_STAGE = (1 << 1),
+	EMISSION_STAGE = (1 << 2),
+
+	ALL_STAGE = AMBIENT_STAGE | DIFFUSE_SPECULAR_STAGE | EMISSION_STAGE
+};
+
+enum BlendMode {
+	NORMAL = 0,
+	ADDITIVE
+};
+
+enum LightType {
+	UNLIT = 0,
+	AMBIENT,
+	DIRECTIONAL,
+	POINT,
+	SPOT,
+	EMISSION
+};
+
+enum PipelineId {
+	P_SHADOWMAP_BUILD = 0,
+	P_REFLECTIONMAP_BUILD,
+	P_DRAW_UNLIT,
+	P_DRAW_LIT,
+
+	TOTAL_PIPELINE
+};
+
+enum ObjectType {
+	OT_RENDERABLE,
+	OT_LIGHT,
+	OT_CAMERA
+};
+
+enum ObjectGroup {
+	OG_STATIC,
+	OG_DYNAMIC
+};
