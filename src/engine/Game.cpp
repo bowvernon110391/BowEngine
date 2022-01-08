@@ -326,7 +326,7 @@ void Game::onRender(float dt) {
 	endRenderImGui();
 	
 	// swap buffer?
-	SDL_GL_SwapWindow(wndApp);
+	//SDL_GL_SwapWindow(wndApp);
 }
 
 void Game::onEvent(SDL_Event* e) {
