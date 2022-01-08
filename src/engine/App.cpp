@@ -101,9 +101,7 @@ void App::createWindow() {
     SDL_Log("GLAD context initialized!");
 
 	SDL_GL_MakeCurrent(wndApp, glCtx);
-    // create renderer that is hardware accelerated and support render to texture
-    //renderer = SDL_CreateRenderer(wndApp, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
-
+    
 	// vsync stuffs?
 	if (SDL_GL_SetSwapInterval(1) < 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to enable vsync: %s", SDL_GetError());
@@ -177,9 +175,6 @@ void App::run() {
     onDestroy();
 
     // clean up
-	SDL_Log("Destroying renderer...");
-    SDL_DestroyRenderer(renderer);
-
 	SDL_Log("Deleting OpenGL Context...");
     SDL_GL_DeleteContext(glCtx);
 	

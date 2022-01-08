@@ -34,8 +34,6 @@ protected:
     int fps;
 
     SDL_GLContext glCtx;
-
-    SDL_Renderer *renderer;
 public:
     App(int tickRate = 50, const char* title="SDL App", int w = 800, int h = 600);
     ~App();
