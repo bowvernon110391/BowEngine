@@ -7,23 +7,6 @@
 #include "ShaderSource.h"
 #include "MaterialInputs.h"
 
-static SDL_Window* lastWindow = NULL;
-static SDL_GLContext lastContext = NULL;
-
-static void pushContext() {
-	lastWindow = SDL_GL_GetCurrentWindow();
-	lastContext = SDL_GL_GetCurrentContext();
-}
-static void popContext() {
-	if (lastWindow && lastContext) {
-		SDL_GL_MakeCurrent(lastWindow, lastContext);
-	}
-}
-
-static void setContext(ContextData* d) {
-	SDL_GL_MakeCurrent(d->window, d->glContext);
-}
-
 ShaderInput* Game::loadBasicShaderData(const char* name, void* pdata)
 {
 	return new MaterialInput();
