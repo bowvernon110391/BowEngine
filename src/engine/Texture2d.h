@@ -35,15 +35,6 @@ public:
 
 	virtual const char* type() { return "TEXTURE_2D"; }
 
-	bool createHandle() {
-		glGenTextures(1, &texId);
-
-		if (!texId)
-			return false;
-
-		return true;
-	}
-
 	virtual void generateMipMap();
 
 	bool upload(bool retainPixelData = false);

@@ -89,7 +89,11 @@ public:
 			assert(r && "Failed to load resource!");
 			// return default resource
 			// return nullResource;
-			return this->get(name, false);
+			//return this->get(name, false);
+			return r;
+		}
+		else if (!autoload) {
+			return nullptr;
 		}
 		
 		return it->second;

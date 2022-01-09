@@ -91,16 +91,20 @@ void App::createWindow() {
 
 
     glCtx = SDL_GL_CreateContext(wndApp);
+    SDL_GL_MakeCurrent(wndApp, glCtx);
 
     // initialize glad
-    bool errGlad = bUseGLES ? (gladLoadGLES2Loader(SDL_GL_GetProcAddress) == 0) : (gladLoadGLLoader(SDL_GL_GetProcAddress) == 0);
+    bool errGlad = bUseGLES ? (gladLoadGLES2Loader(SDL_GL_GetProcAddress) == 0) : (gladLoadGLES2Loader(SDL_GL_GetProcAddress) == 0 && gladLoadGLLoader(SDL_GL_GetProcAddress) == 0);
     if (errGlad) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "failed to initalize GLAD context!");
         exit(-1);
     }
-    SDL_Log("GLAD context initialized!");
+    if (bUseGLES)
+        SDL_Log("GLAD context initialized with GLES2!");
+    else
+        SDL_Log("GLAD context initialized with GLCORE!");
 
-	SDL_GL_MakeCurrent(wndApp, glCtx);
+	
     
 	// vsync stuffs?
 	if (SDL_GL_SetSwapInterval(1) < 0) {

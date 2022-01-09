@@ -87,10 +87,13 @@ bool Texture2D::upload(bool retainPixelData) {
 	assert(glGetError() == GL_NO_ERROR);
 
 	if (width && height) {
-		if (!texId) {
-			createHandle();
-			assert(texId != 0);
-		}
+		// gen tex id
+		texId = 0;
+		glGenTextures(1, &texId);
+#ifdef _DEBUG
+		SDL_Log("TEXTURE_ID: %u", texId);
+#endif
+		assert(texId != 0);
 
 		assert(glGetError() == GL_NO_ERROR);
 #ifdef _DEBUG

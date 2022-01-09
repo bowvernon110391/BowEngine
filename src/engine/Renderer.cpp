@@ -172,10 +172,6 @@ Renderer* Renderer::useCamera(Camera* cam) {
 }
 
 Renderer* Renderer::setViewport(int x, int y, int w, int h) {
-#ifdef _DEBUG
-	SDL_Log("RENDERER_SET_VIEWPORT: %d %d %d %d\n", x, y, w, h);
-#endif // _DEBUG
-
 	viewport[0] = x;
 	viewport[1] = y;
 	viewport[2] = w;

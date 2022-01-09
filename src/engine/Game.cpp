@@ -26,8 +26,14 @@
 #include "ShaderFX.h"
 #include "MaterialInputs.h"
 #include "MatrixInput.h"
+#include "BufferObjects.h"
 
 #include "StaticMeshObject.h"
+
+// try locally first?
+FBO* fbo;
+RBO* rbo;
+bool mainViewportFocused = false;
 
 Game::Game() {
 	cam_horzRot = 0;
@@ -45,7 +51,7 @@ Game::~Game() {
 
 void Game::onInit() {
 	// debug print
-	glEnable(GL_MULTISAMPLE);
+	//glEnable(GL_MULTISAMPLE);
 	srand(SDL_GetTicks());
 	initImGui();
 
@@ -144,6 +150,23 @@ void Game::onInit() {
 	// debug print
 	m_scene->printDebug();
 
+	fbo = new FBO(iWidth, iHeight);
+	rbo = new RBO(iWidth, iHeight);
+
+	fbo->create();
+	assert(glGetError() == GL_NO_ERROR);
+
+	// must be bind because we're calling glFrameBufferRenderBuffer
+	fbo->bind();
+	rbo->create();
+	assert(glGetError() == GL_NO_ERROR);
+
+	assert(fbo->isComplete() && "FBO INCOMPLETE!");
+
+	// clear em
+	FBO::unbind();
+	RBO::unbind();
+
 	assert(glGetError() == GL_NO_ERROR);
 }
 
@@ -173,6 +196,10 @@ void Game::onDestroy() {
 	delete materialMgr;
 	delete textureMgr;
 	delete sourceMgr;
+
+	// buffers
+	delete fbo;
+	delete rbo;
 }
 
 void Game::onUpdate(float dt) {
@@ -197,7 +224,13 @@ void Game::onRender(float dt) {
 	//SDL_Log("Camera pos: %.4f, %.4f, %.4f\n", camPos.x, camPos.y, camPos.z);
 	m_renderer->getCamera()->setPosition(camPos);
 	m_renderer->getCamera()->setTarget(glm::vec3(0, 0, 0));
-	
+
+	// set fbo
+	fbo->bind();
+	m_renderer->setViewport(0, 0, fbo->getWidth(), fbo->getHeight());
+	// enable depth test
+	glEnable(GL_DEPTH_TEST);
+
 	// clear depth and color
 	glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -207,6 +240,9 @@ void Game::onRender(float dt) {
 
 	// debug?
 	m_scene->static_tree->debugDraw(m_renderer);
+
+	// unset fbo
+	FBO::unbind();
 
 	// 2d rendering
 	glDisable(GL_DEPTH_TEST);
@@ -274,7 +310,8 @@ void Game::onRender(float dt) {
 			if (currentTexture) {
 				Texture2D* tex = textureMgr->get(currentTexture);
 				if (tex) {
-					ImGui::Image((ImTextureID)tex->id, ImVec2(256, 256), ImVec2(0, 1), ImVec2(1, 0));
+					ImGui::Text("Texture ID: %u", tex->texId);
+					ImGui::Image((ImTextureID)tex->texId, ImVec2(256, 256), ImVec2(0, 1), ImVec2(1, 0));
 				}
 			}
 			
@@ -294,31 +331,41 @@ void Game::onRender(float dt) {
 
 
 		// Main viewport (render/fbo)
-		ImGui::SetNextWindowSize(ImVec2(640, 480), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(iWidth, iHeight), ImGuiCond_FirstUseEver);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-		ImGui::Begin("Main Viewport", 0, ImGuiWindowFlags_NoScrollbar);
-
+		char windowTitle[128];
+		sprintf(windowTitle, "Main Window (%s)###MAIN_VIEWPORT", mainViewportFocused ? "ACTIVE" : "INACTIVE");
+		ImGui::Begin(windowTitle, 0, ImGuiWindowFlags_NoScrollbar);
 		ImGui::PopStyleVar(1);
 
+		// grab available region size and current cursor pos (top left)
 		ImVec2 regionSize = ImGui::GetContentRegionAvail();
-
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 
+		// for cursor handling
+		ImVec2 windowPos = ImGui::GetWindowPos();
+		ImVec2 margin = ImVec2(4.f, 4.f);
+		ImVec2 minRect(windowPos.x + cursorPos.x, windowPos.y + cursorPos.y);
+		ImVec2 maxRect(minRect.x + regionSize.x, minRect.y + regionSize.y);
+
+		// track viewport focus status (only in focus if it's focused and cursor is within it)
+		bool inRegion = io.MousePos.x > minRect.x + margin.x && io.MousePos.x < maxRect.x - margin.x
+			&& io.MousePos.y > minRect.y + margin.y && io.MousePos.y < maxRect.y - margin.y;
+		mainViewportFocused = ImGui::IsWindowFocused() && inRegion;
+		
+		// compute real usable pos and size for image widget
 		ImVec2 imgPos;
 		ImVec2 imgSize;
+		float fboAspect = fbo->getAspect();
 
-		Helper::computePosAndSize(regionSize, 1.f, imgPos, imgSize);
+		Helper::computePosAndSize(regionSize, fboAspect, imgPos, imgSize);
 		// offset it with cursor pos
 		imgPos.x += cursorPos.x;
 		imgPos.y += cursorPos.y;
-		//ImGui::Text("This window max region size(%d, %d)", (int)drawSize.x, (int)drawSize.y);
-		if (currentTexture) {
-			Texture2D* tex = textureMgr->get(currentTexture);
-			if (tex) {
-				ImGui::SetCursorPos(imgPos);
-				ImGui::Image((ImTextureID)tex->id, imgSize, ImVec2(0, 1), ImVec2(1, 0));
-			}
-		}
+		
+		// draw it
+		ImGui::SetCursorPos(imgPos);
+		ImGui::Image((ImTextureID)fbo->getTextureId(), imgSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
 	}
@@ -345,6 +392,11 @@ void Game::onEvent(SDL_Event* e) {
 		canHandleInput = !ImGui_ImplSDL2_ProcessEvent(e);
 	}
 	ImGui_ImplSDL2_ProcessEvent(e);
+
+	// in case of window resize, force inactivation?
+	/*if (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_RESIZED) {
+		mainViewportFocused = false;
+	}*/
 
 	// let's print out event
 	bool interesting = false;
@@ -383,7 +435,7 @@ void Game::onEvent(SDL_Event* e) {
 
 	switch (e->type) {
     case SDL_MULTIGESTURE:
-        if (io.WantCaptureMouse) break;
+        if (!mainViewportFocused && io.WantCaptureMouse) break;
         is_multigesturing = true;
         fingercount = 2;
         dragging = false;
@@ -401,7 +453,7 @@ void Game::onEvent(SDL_Event* e) {
 		break;
 	// mimic dragging for finger down
 	case SDL_FINGERDOWN:
-		if (io.WantCaptureMouse || is_multigesturing) break;
+		if (!mainViewportFocused && io.WantCaptureMouse || is_multigesturing) break;
 		++fingercount;
 		if (fingercount >= 2) {
 		    is_multigesturing = true;
@@ -412,7 +464,7 @@ void Game::onEvent(SDL_Event* e) {
 		cur_y = last_y = e->tfinger.y * viewport[3];
 		break;
 	case SDL_MOUSEBUTTONDOWN:
-		if (io.WantCaptureMouse) break;
+		if (!mainViewportFocused && io.WantCaptureMouse) break;
 		dragging = true;
 		cur_x = last_x = e->button.x;
 		cur_y = last_y = e->button.y;
@@ -420,7 +472,7 @@ void Game::onEvent(SDL_Event* e) {
 
 	//// mimic mouse motion
 	case SDL_FINGERMOTION:
-		if (io.WantCaptureMouse || is_multigesturing) {
+		if (!mainViewportFocused && io.WantCaptureMouse || is_multigesturing) {
 			break;
 		}
 
@@ -434,7 +486,7 @@ void Game::onEvent(SDL_Event* e) {
 		last_y = cur_y;
 		break;
 	case SDL_MOUSEMOTION:
-		if (io.WantCaptureMouse) break;
+		if (!mainViewportFocused && io.WantCaptureMouse) break;
 		cur_x = e->motion.x;
 		cur_y = e->motion.y;
 		if (dragging) {
@@ -445,7 +497,7 @@ void Game::onEvent(SDL_Event* e) {
 		last_y = cur_y;
 		break;
 	case SDL_MOUSEWHEEL:
-		if (io.WantCaptureMouse) break;
+		if (!mainViewportFocused && io.WantCaptureMouse) break;
 		cam_dist -= e->wheel.y * 0.2f;
 		break;
 
@@ -456,7 +508,7 @@ void Game::onEvent(SDL_Event* e) {
 	    dragging = is_multigesturing = false;
 	    break;
 	case SDL_MOUSEBUTTONUP:
-		if (io.WantCaptureMouse) break;
+		if (!mainViewportFocused && io.WantCaptureMouse) break;
 		dragging = false;
 		break;
 

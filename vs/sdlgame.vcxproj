@@ -157,6 +157,7 @@
     <ClInclude Include="..\src\engine\AABBTree.h" />
     <ClInclude Include="..\src\engine\AbstractRenderObject.h" />
     <ClInclude Include="..\src\engine\App.h" />
+    <ClInclude Include="..\src\engine\BufferObjects.h" />
     <ClInclude Include="..\src\engine\Camera.h" />
     <ClInclude Include="..\src\engine\Game.h" />
     <ClInclude Include="..\src\engine\Helper.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="..\src\engine\AABBTree.cpp" />
     <ClCompile Include="..\src\engine\AbstractRenderObject.cpp" />
     <ClCompile Include="..\src\engine\App.cpp" />
+    <ClCompile Include="..\src\engine\BufferObjects.cpp" />
     <ClCompile Include="..\src\engine\Camera.cpp" />
     <ClCompile Include="..\src\engine\Game.cpp" />
     <ClCompile Include="..\src\engine\Helper.cpp" />

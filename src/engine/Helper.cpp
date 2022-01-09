@@ -78,7 +78,7 @@ void Helper::computePosAndSize(const ImVec2& region, float imgAspect, ImVec2& po
         pos.y = 0;
 
         // compute size x, which is basically imgAspect * region.y
-        size.x = imgAspect * region.y;
+        size.x = imgAspect * size.y;
         pos.x = (region.x - size.x) * 0.5f;
     }
     else {
@@ -87,7 +87,7 @@ void Helper::computePosAndSize(const ImVec2& region, float imgAspect, ImVec2& po
         pos.x = 0;
 
         // compute size y, which is basically imgAspect * size.x
-        size.y = imgAspect * region.x;
+        size.y = (1.0f/imgAspect) * size.x;
         pos.y = (region.y - size.y) * 0.5f;
     }
 }
