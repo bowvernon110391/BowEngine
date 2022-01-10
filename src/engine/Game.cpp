@@ -264,6 +264,7 @@ void Game::onRender(float dt) {
 			ImGui::SameLine();
 			ImGui::Text("%s (%.2f, %.2f)", title.c_str(), io.MousePos.x, io.MousePos.y);
 			ImGui::Text("FBO size %d %d", fbo->width, fbo->height);
+			ImGui::ColorEdit4("Clear Color", &clearColor.x);
 			if (ImGui::Button("QUIT")) {
 			    this->setRunFlag(false);
 			}
