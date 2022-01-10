@@ -40,8 +40,8 @@ bool FBO::create()
 	// create the framebuffer texture first
 	glTexImage2D(textureType, 0, format, (GLsizei)width, (GLsizei)height, 0, format, GL_UNSIGNED_BYTE, 0);
 	// specify no filtering?
-	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// specify clamp to edge
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
