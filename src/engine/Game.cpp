@@ -33,6 +33,7 @@
 // try locally first?
 FBO* fbo;
 bool mainViewportFocused = false;
+ImVec2 viewportSize;
 
 Game::Game() {
 	cam_horzRot = 0;
@@ -158,6 +159,8 @@ void Game::onInit() {
 
 	// instantiate
 	fbo->resize(iWidth, iHeight);
+	viewportSize.x = (float)iWidth;
+	viewportSize.y = (float)iHeight;
 
 	// clear em
 	FBO::unbind();
@@ -221,7 +224,7 @@ void Game::onRender(float dt) {
 
 	// set fbo
 	fbo->bind();
-	m_renderer->setViewport(0, 0, fbo->width, fbo->height);
+	m_renderer->setViewport(0, 0, (int)viewportSize.x, (int)viewportSize.y);
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 
@@ -264,6 +267,7 @@ void Game::onRender(float dt) {
 			ImGui::SameLine();
 			ImGui::Text("%s (%.2f, %.2f)", title.c_str(), io.MousePos.x, io.MousePos.y);
 			ImGui::Text("FBO size %d %d", fbo->width, fbo->height);
+			ImGui::Text("Viewport size %.2f %.2f", viewportSize.x, viewportSize.y);
 			ImGui::ColorEdit4("Clear Color", &clearColor.x);
 			if (ImGui::Button("QUIT")) {
 			    this->setRunFlag(false);
@@ -334,14 +338,14 @@ void Game::onRender(float dt) {
 		ImGui::PopStyleVar(1);
 
 		// grab available region size and current cursor pos (top left)
-		ImVec2 regionSize = ImGui::GetContentRegionAvail();
+		viewportSize = ImGui::GetContentRegionAvail();
 		ImVec2 cursorPos = ImGui::GetCursorPos();
 
 		// for cursor handling
 		ImVec2 windowPos = ImGui::GetWindowPos();
 		ImVec2 margin = ImVec2(4.f, 4.f);
 		ImVec2 minRect(windowPos.x + cursorPos.x, windowPos.y + cursorPos.y);
-		ImVec2 maxRect(minRect.x + regionSize.x, minRect.y + regionSize.y);
+		ImVec2 maxRect(minRect.x + viewportSize.x, minRect.y + viewportSize.y);
 
 		// track viewport focus status (only in focus if it's focused and cursor is within it)
 		bool inRegion = io.MousePos.x > minRect.x + margin.x && io.MousePos.x < maxRect.x - margin.x
@@ -349,25 +353,31 @@ void Game::onRender(float dt) {
 		mainViewportFocused = ImGui::IsWindowFocused() && inRegion;
 		
 		// compute real usable pos and size for image widget
-		ImVec2 imgPos;
+		/*ImVec2 imgPos;
 		ImVec2 imgSize;
-		float fboAspect = (float)fbo->width / (float)fbo->height;
+		float fboAspect = (float)fbo->width / (float)fbo->height;*/
 
-		Helper::computePosAndSize(regionSize, fboAspect, imgPos, imgSize);
-		// offset it with cursor pos
-		imgPos.x += cursorPos.x;
-		imgPos.y += cursorPos.y;
+		//Helper::computePosAndSize(viewportSize, fboAspect, imgPos, imgSize);
+		//// offset it with cursor pos
+		//imgPos.x += cursorPos.x;
+		//imgPos.y += cursorPos.y;
 		
 		// draw it
-		ImGui::SetCursorPos(imgPos);
+		//ImGui::SetCursorPos(imgPos);
 		TextureAttachment* fboTex = (TextureAttachment*)fbo->getAttachment(0);
-		if (fboTex)
-			ImGui::Image((ImTextureID)fboTex->texId, imgSize, ImVec2(0, 1), ImVec2(1, 0));
+		if (fboTex) {
+			float maxS = viewportSize.x / (float)fbo->width;
+			float maxT = viewportSize.y / (float)fbo->height;
+			ImGui::Image((ImTextureID)fboTex->texId, viewportSize, ImVec2(0, maxT), ImVec2(maxS, 0));
+		}
 
 		ImGui::End();
 	}
 
 	endRenderImGui();
+
+	// update viewport size
+	fbo->resizeToPOT((int)viewportSize.x, (int)viewportSize.y);
 	
 	// swap buffer?
 	//SDL_GL_SwapWindow(wndApp);
