@@ -1,56 +1,78 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <vector>
+
+// FboAttachment (base for fbo attachment)
+class FBO;
+class FBOAttachment {
+public:
+	FBOAttachment() {}
+	virtual ~FBOAttachment() {}
+
+	// when creating?
+	virtual bool onResize(int w, int h) = 0;
+
+	// set it?
+	void setFBO(FBO* f) { fbo = f; }
+
+	FBO* fbo;
+};
 
 //
 // Fbo: Frambe buffer object
 class FBO {
 public:
-	FBO(int width, int height, GLenum textureType = GL_TEXTURE_2D, 
-		GLenum format = GL_RGB, GLenum attachment = GL_COLOR_ATTACHMENT0);
+	FBO();
 	~FBO();
 
 	// static function to help unbind
 	void static unbind();
-
 	// all function of this
 	void bind();
-	// create it
-	bool create();
-	// destroy it
-	void destroy();
+	int addAttachment(FBOAttachment* att);
+	FBOAttachment* getAttachment(int idx) { return attachments[idx]; }
 	// check completeness
 	static bool isComplete();
 
-	GLuint getTextureId() { return fboTexture; }
-	int getWidth() { return width;  }
-	int getHeight() { return height; }
-	float getAspect() { return (float)width / (float)height; }
+	// force to POT in the closest range?
+	// will resize the internal w & h
+	void resizeToPOT(int w, int h);
+	void resize(int w, int h);
+	void onResize();
 
-protected:
+public:
 	GLuint fboId;
-	GLuint fboTexture;
-
-	GLenum textureType, format, attachment;
-
 	int width, height;
+
+	std::vector<FBOAttachment*> attachments;
 };
 
 // 
 // Rbo: Render buffer object
-class RBO {
+class RBOAttachment : public FBOAttachment {
 public:
-	RBO(int width, int height, GLenum format = GL_DEPTH_COMPONENT24, GLenum attachment = GL_DEPTH_ATTACHMENT);
-	~RBO();
+	RBOAttachment(GLenum format = GL_DEPTH_COMPONENT24, GLenum attachment = GL_DEPTH_ATTACHMENT);
+	~RBOAttachment();
 
-	static void unbind();
-
-	void bind();
-	bool create();
-	void destroy();
-
+	// Inherited via FBOAttachment
+	virtual bool onResize(int w, int h) override;
 protected:
 	GLuint rboId;
-	int width, height;
 	GLenum format, attachment;
+
+};
+
+// 
+// Texture attachment
+class TextureAttachment : public FBOAttachment {
+public:
+	TextureAttachment(GLenum textureType = GL_TEXTURE_2D, GLenum format = GL_RGB, GLenum byteType = GL_UNSIGNED_BYTE, GLenum attachment = GL_COLOR_ATTACHMENT0);
+	~TextureAttachment();
+
+	// Inherited via FBOAttachment
+	virtual bool onResize(int w, int h) override;
+public:
+	GLuint texId;
+	GLenum format, attachment, textureType, byteType;
 };

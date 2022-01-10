@@ -32,7 +32,6 @@
 
 // try locally first?
 FBO* fbo;
-RBO* rbo;
 bool mainViewportFocused = false;
 
 Game::Game() {
@@ -150,22 +149,18 @@ void Game::onInit() {
 	// debug print
 	m_scene->printDebug();
 
-	fbo = new FBO(iWidth, iHeight);
-	rbo = new RBO(iWidth, iHeight);
+	// create fbo
+	fbo = new FBO();
 
-	fbo->create();
-	assert(glGetError() == GL_NO_ERROR);
+	// add attachments
+	fbo->addAttachment(new TextureAttachment(GL_TEXTURE_2D, GL_RGB, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT0));
+	fbo->addAttachment(new RBOAttachment(GL_DEPTH_COMPONENT24, GL_DEPTH_ATTACHMENT));
 
-	// must be bind because we're calling glFrameBufferRenderBuffer
-	fbo->bind();
-	rbo->create();
-	assert(glGetError() == GL_NO_ERROR);
-
-	assert(fbo->isComplete() && "FBO INCOMPLETE!");
+	// instantiate
+	fbo->resize(iWidth, iHeight);
 
 	// clear em
 	FBO::unbind();
-	RBO::unbind();
 
 	assert(glGetError() == GL_NO_ERROR);
 }
@@ -199,7 +194,6 @@ void Game::onDestroy() {
 
 	// buffers
 	delete fbo;
-	delete rbo;
 }
 
 void Game::onUpdate(float dt) {
@@ -227,7 +221,7 @@ void Game::onRender(float dt) {
 
 	// set fbo
 	fbo->bind();
-	m_renderer->setViewport(0, 0, fbo->getWidth(), fbo->getHeight());
+	m_renderer->setViewport(0, 0, fbo->width, fbo->height);
 	// enable depth test
 	glEnable(GL_DEPTH_TEST);
 
@@ -269,7 +263,7 @@ void Game::onRender(float dt) {
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), "FPS: %d", fps);
 			ImGui::SameLine();
 			ImGui::Text("%s (%.2f, %.2f)", title.c_str(), io.MousePos.x, io.MousePos.y);
-			ImGui::SameLine();
+			ImGui::Text("FBO size %d %d", fbo->width, fbo->height);
 			if (ImGui::Button("QUIT")) {
 			    this->setRunFlag(false);
 			}
@@ -356,7 +350,7 @@ void Game::onRender(float dt) {
 		// compute real usable pos and size for image widget
 		ImVec2 imgPos;
 		ImVec2 imgSize;
-		float fboAspect = fbo->getAspect();
+		float fboAspect = (float)fbo->width / (float)fbo->height;
 
 		Helper::computePosAndSize(regionSize, fboAspect, imgPos, imgSize);
 		// offset it with cursor pos
@@ -365,7 +359,9 @@ void Game::onRender(float dt) {
 		
 		// draw it
 		ImGui::SetCursorPos(imgPos);
-		ImGui::Image((ImTextureID)fbo->getTextureId(), imgSize, ImVec2(0, 1), ImVec2(1, 0));
+		TextureAttachment* fboTex = (TextureAttachment*)fbo->getAttachment(0);
+		if (fboTex)
+			ImGui::Image((ImTextureID)fboTex->texId, imgSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
 	}

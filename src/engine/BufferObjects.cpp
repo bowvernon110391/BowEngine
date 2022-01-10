@@ -1,16 +1,25 @@
 #include "BufferObjects.h"
+#include "Helper.h"
 #include <SDL_assert.h>
 
-FBO::FBO(int width, int height, GLenum textureType, GLenum format, GLenum attachment)
-	:textureType(textureType), format(format), attachment(attachment),
-	width(width), height(height)
+
+FBO::FBO()
+	:width(0), height(0)
 {
-	//fboId = fboTexture = 0;
+	fboId = 0;
+	glGenFramebuffers(1, &fboId);
 }
 
 FBO::~FBO()
 {
-	destroy();
+	// delete all attachment, then delete ourselves
+	for (FBOAttachment* att : attachments) {
+		if (att)
+			delete att;
+	}
+	attachments.clear();
+
+	glDeleteFramebuffers(1, &fboId);
 }
 
 void FBO::unbind()
@@ -21,49 +30,17 @@ void FBO::unbind()
 void FBO::bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-	//glBindTexture(textureType, fboTexture);
 }
 
-bool FBO::create()
+int FBO::addAttachment(FBOAttachment* att)
 {
-	// generate id
-	glGenFramebuffers(1, &fboId);
-	SDL_assert(fboId && "Failed instantiating framebuffer id");
-	// generate texture id too?
-	glGenTextures(1, &fboTexture);
-	SDL_assert(fboId && "Failed instantiating framebuffer texture id");
-	glBindTexture(textureType, fboTexture);
-
-	// bind it
-	bind();
-
-	// create the framebuffer texture first
-	glTexImage2D(textureType, 0, format, (GLsizei)width, (GLsizei)height, 0, format, GL_UNSIGNED_BYTE, 0);
-	// specify no filtering?
-	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// specify clamp to edge
-	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	// setup attachment
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, textureType, fboTexture, 0);
-
-	unbind();
-	glBindTexture(textureType, 0);
-
-	return true;
-}
-
-void FBO::destroy()
-{
-	// delete it
-	if (fboTexture) {
-		glDeleteTextures(1, &fboTexture);
-	}
-	if (fboId) {
-		glDeleteFramebuffers(1, &fboId);
-	}
+	if (!att)
+		return false;
+	int idx = attachments.size();
+	// just add, nothing more
+	att->setFBO(this);
+	attachments.push_back(att);
+	return idx;
 }
 
 bool FBO::isComplete()
@@ -71,45 +48,88 @@ bool FBO::isComplete()
 	return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
-/*
-* RENDER BUFFER SECTION
-*/
-RBO::RBO(int width, int height, GLenum format, GLenum attachment)
-	:width(width), height(height), format(format), attachment(attachment)
+void FBO::resizeToPOT(int w, int h)
 {
-	//rboId = 0;
+	resize(Helper::getNearestPOT(w), Helper::getNearestPOT(h));
 }
 
-RBO::~RBO()
+void FBO::resize(int w, int h)
 {
-	destroy();
+	if (width != w || height != h) {
+		width = w;
+		height = h;
+		onResize();
+	}
 }
 
-void RBO::unbind()
+void FBO::onResize()
 {
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-}
-
-void RBO::bind()
-{
-	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-}
-
-bool RBO::create()
-{
-	// create it
-	glGenRenderbuffers(1, &rboId);
-	SDL_assert(rboId && "Failed glGenRenderBuffers");
+	// do the resizing?
+	// we assume the width and height is already set
 	bind();
+	for (FBOAttachment* att : attachments) {
+		att->onResize(width, height);
+	}
+}
 
-	// generate storage
-	glRenderbufferStorage(GL_RENDERBUFFER, format, (GLsizei)width, (GLsizei)height);
+RBOAttachment::RBOAttachment(GLenum format, GLenum attachment)
+	:format(format), attachment(attachment)
+{
+	glGenRenderbuffers(1, &rboId);
+}
+
+RBOAttachment::~RBOAttachment()
+{
+	glDeleteRenderbuffers(1, &rboId);
+}
+
+bool RBOAttachment::onResize(int w, int h)
+{
+	// first, bind it?
+	glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+	// storage specifier
+	glRenderbufferStorage(GL_RENDERBUFFER, format, w, h);
+	// set attachment
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, rboId);
+
+	// unbind it
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	return true;
 }
 
-void RBO::destroy()
+/*
+* Texture attachment for this
+*/
+
+TextureAttachment::TextureAttachment(GLenum textureType, GLenum format, GLenum byteType, GLenum attachment)
+	:textureType(textureType), format(format), attachment(attachment),
+	byteType(byteType)
 {
-	glDeleteRenderbuffers(1, &rboId);
+	glGenTextures(1, &texId);
+}
+
+TextureAttachment::~TextureAttachment()
+{
+	glDeleteTextures(1, &texId);
+}
+
+bool TextureAttachment::onResize(int w, int h)
+{
+	// create it?
+	glBindTexture(textureType, texId);
+
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexImage2D(textureType, 0, format, w, h, 0, format, byteType, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, textureType, texId, 0);
+
+	// unbind texture
+	glBindTexture(textureType, 0);
+	return true;
 }

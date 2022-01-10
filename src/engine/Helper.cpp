@@ -91,3 +91,12 @@ void Helper::computePosAndSize(const ImVec2& region, float imgAspect, ImVec2& po
         pos.y = (region.y - size.y) * 0.5f;
     }
 }
+
+int Helper::getNearestPOT(int s)
+{
+    int pot = 1;  // start from one
+    while (pot < s) {
+        pot = pot << 1;
+    }
+    return pot;
+}

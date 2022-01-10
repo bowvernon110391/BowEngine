@@ -11,6 +11,8 @@ namespace Helper {
 	void printMatrix(const float* m);
 	// calculate pos and size to display inside a specific region
 	void computePosAndSize(const ImVec2& region, float imgAspect, ImVec2& pos, ImVec2& size);
+	// grab nearest power of two integer?
+	int getNearestPOT(int s);
 }
 
 
