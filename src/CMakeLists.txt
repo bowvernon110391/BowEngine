@@ -9,8 +9,8 @@ find_package(SDL2 REQUIRED)
 include_directories(sdlgame ${SDL2_INCLUDE_DIRS})
 
 # find glm
-# find_package(GLM REQUIRED)
-# include_directories(sdlgame ${GLM_INCLUDE_DIRS})
+find_package(glm REQUIRED)
+include_directories(sdlgame ${GLM_INCLUDE_DIRS})
 
 add_library(imgui 
     STATIC
@@ -35,31 +35,32 @@ add_library(glad
     )
 
 add_executable(game
-    AABBTree.cpp
-    AbstractRenderObject.cpp
-    App.cpp
-    Camera.cpp
-    Game.cpp
-    Helper.cpp
-    LargeMesh.cpp
-    Loader.cpp
-    main.cpp
-    MatrixInput.cpp
-    MaterialInputs.cpp
-    Mesh.cpp
-    Pipeline.cpp
-    Renderable.cpp
-    RenderCommand.cpp
-    Renderer.cpp
-    SceneData.cpp
-    SceneGraph.cpp
-    Shader.cpp
-    ShaderFX.cpp
-    ShaderInstanceManager.cpp
-    ShaderSource.cpp
-    StaticMeshObject.cpp
-    Texture2d.cpp
-    UnlitPipeline.cpp
+    engine/AABBTree.cpp
+    engine/AbstractRenderObject.cpp
+    engine/App.cpp
+    engine/Camera.cpp
+    engine/Game.cpp
+    engine/Helper.cpp
+    engine/LargeMesh.cpp
+    engine/Loader.cpp
+    engine/main.cpp
+    engine/MatrixInput.cpp
+    engine/MaterialInputs.cpp
+    engine/Mesh.cpp
+    engine/Pipeline.cpp
+    engine/Renderable.cpp
+    engine/RenderCommand.cpp
+    engine/Renderer.cpp
+    engine/SceneData.cpp
+    engine/SceneGraph.cpp
+    engine/Shader.cpp
+    engine/ShaderFX.cpp
+    engine/ShaderInstanceManager.cpp
+    engine/ShaderSource.cpp
+    engine/StaticMeshObject.cpp
+    engine/Texture2d.cpp
+    engine/UnlitPipeline.cpp
+    engine/BufferObjects.cpp
     )
 
 target_link_libraries(game 
