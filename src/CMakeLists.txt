@@ -12,6 +12,9 @@ include_directories(sdlgame ${SDL2_INCLUDE_DIRS})
 find_package(glm REQUIRED)
 include_directories(sdlgame ${GLM_INCLUDE_DIRS})
 
+# define preprocessor
+add_compile_definitions(BT_USE_SSE_IN_API)
+
 # source for imgui
 file(GLOB_RECURSE IMGUI_SRC imgui/*.cpp)
 
@@ -19,7 +22,7 @@ add_library(imgui
     STATIC
         ${IMGUI_SRC}
     )
-
+	
 add_library(bullet 
     STATIC
         bullet/btBulletCollisionAll.cpp
