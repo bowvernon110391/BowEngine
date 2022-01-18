@@ -1,12 +1,4 @@
 
-# find sdl2
-find_package(SDL2 REQUIRED)
-include_directories(sdlgame ${SDL2_INCLUDE_DIRS})
-
-# find glm
-find_package(glm REQUIRED)
-include_directories(sdlgame ${GLM_INCLUDE_DIRS})
-
 # define preprocessor (WEIRDLY only for MSVC, because otherwise it bugs out)
 if (MSVC)
     add_compile_definitions(BT_USE_SSE_IN_API)
