@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
-project(sdlgame LANGUAGES C CXX)
-
-include_directories(sdlgame ./glad/include)
-include_directories(sdlgame ./bullet)
 
 # find sdl2
 find_package(SDL2 REQUIRED)
@@ -17,14 +12,8 @@ if (MSVC)
     add_compile_definitions(BT_USE_SSE_IN_API)
 endif(MSVC)
 
-# source for imgui
-file(GLOB_RECURSE IMGUI_SRC imgui/*.cpp)
+include_directories(sdlgame ./bullet)
 
-add_library(imgui 
-    STATIC
-        ${IMGUI_SRC}
-    )
-	
 add_library(bullet 
     STATIC
         bullet/btBulletCollisionAll.cpp
@@ -32,26 +21,14 @@ add_library(bullet
         bullet/btLinearMathAll.cpp
     )
 
+include_directories(sdlgame ./glad/include)
+
 add_library(glad
     STATIC
         glad/src/glad.c
     )
 
-# engine source files
-file(GLOB_RECURSE SRC engine/*.cpp)
-
-add_executable(game
-    ${SRC}
-    )
-
-target_link_libraries(game 
-    glad 
-    bullet 
-    imgui 
-    ${SDL2_LIBRARIES}
-    ${CMAKE_DL_LIBS}
-    )
-
-add_custom_command(TARGET game
-    POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game> ../bin/)   
+add_subdirectory(imgui)
+add_subdirectory(engine)
+add_subdirectory(game)  
 
