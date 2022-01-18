@@ -12,14 +12,12 @@ include_directories(sdlgame ${SDL2_INCLUDE_DIRS})
 find_package(glm REQUIRED)
 include_directories(sdlgame ${GLM_INCLUDE_DIRS})
 
+# source for imgui
+file(GLOB_RECURSE IMGUI_SRC imgui/*.cpp)
+
 add_library(imgui 
     STATIC
-        imgui/imgui_draw.cpp
-        imgui/imgui_impl_bowie.cpp
-        imgui/imgui_impl_sdl.cpp
-        imgui/imgui_tables.cpp
-        imgui/imgui_widgets.cpp
-        imgui/imgui.cpp
+        ${IMGUI_SRC}
     )
 
 add_library(bullet 
@@ -34,33 +32,11 @@ add_library(glad
         glad/src/glad.c
     )
 
+# engine source files
+file(GLOB_RECURSE SRC engine/*.cpp)
+
 add_executable(game
-    engine/AABBTree.cpp
-    engine/AbstractRenderObject.cpp
-    engine/App.cpp
-    engine/Camera.cpp
-    engine/Game.cpp
-    engine/Helper.cpp
-    engine/LargeMesh.cpp
-    engine/Loader.cpp
-    engine/main.cpp
-    engine/MatrixInput.cpp
-    engine/MaterialInputs.cpp
-    engine/Mesh.cpp
-    engine/Pipeline.cpp
-    engine/Renderable.cpp
-    engine/RenderCommand.cpp
-    engine/Renderer.cpp
-    engine/SceneData.cpp
-    engine/SceneGraph.cpp
-    engine/Shader.cpp
-    engine/ShaderFX.cpp
-    engine/ShaderInstanceManager.cpp
-    engine/ShaderSource.cpp
-    engine/StaticMeshObject.cpp
-    engine/Texture2d.cpp
-    engine/UnlitPipeline.cpp
-    engine/BufferObjects.cpp
+    ${SRC}
     )
 
 target_link_libraries(game 
@@ -70,3 +46,7 @@ target_link_libraries(game
     ${SDL2_LIBRARIES}
     ${CMAKE_DL_LIBS}
     )
+
+add_custom_command(TARGET game
+    POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game> ../bin/)   
+
