@@ -12,8 +12,10 @@ include_directories(sdlgame ${SDL2_INCLUDE_DIRS})
 find_package(glm REQUIRED)
 include_directories(sdlgame ${GLM_INCLUDE_DIRS})
 
-# define preprocessor
-add_compile_definitions(BT_USE_SSE_IN_API)
+# define preprocessor (WEIRDLY only for MSVC, because otherwise it bugs out)
+if (MSVC)
+    add_compile_definitions(BT_USE_SSE_IN_API)
+endif(MSVC)
 
 # source for imgui
 file(GLOB_RECURSE IMGUI_SRC imgui/*.cpp)
