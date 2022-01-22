@@ -82,16 +82,10 @@ void Game::onInit() {
 
 	// add a cube manually
 	meshMgr->put("cube", Mesh::createUnitBox()->createBufferObjects());
-	meshMgr->load("weirdcube.bcf");
-	meshMgr->load("weirdsphere.bcf");
-	meshMgr->load("sphere.bcf");
-	
-	assert(glGetError() == GL_NO_ERROR);
-	//// load textures
-	textureMgr->load("road_on_grass.png"); // ->withWrap(GL_REPEAT, GL_REPEAT);
-	assert(glGetError() == GL_NO_ERROR);
-	textureMgr->load("trimsheet_01.png");
-	assert(glGetError() == GL_NO_ERROR);
+	// meshMgr->load("weirdcube.bcf");
+	// meshMgr->load("male_char_proto.bcf");
+	// meshMgr->load("weirdsphere.bcf");
+	// meshMgr->load("sphere.bcf");
 
 	//textureMgr->get("env.jpg");
 	//textureMgr->load("env.jpg");
@@ -113,13 +107,13 @@ void Game::onInit() {
 		(new ShaderTechnique)->addPass(
 			(new RenderPass(
 				sourceMgr->get("plain.glsl"),
-				(new MaterialInput)->addTexture(textureMgr->get("trimsheet_01.png"))
+				(new MaterialInput)->addTexture(textureMgr->get("police_car.png"))
 			))->setMaterialSetting(setting)
 		)
 	);
 
 	obj = new StaticMeshObject();
-	obj->setMesh(meshMgr->get("weirdcube.bcf"))
+	obj->setMesh(meshMgr->get("police_car.bcf"))
 		->setPosition(glm::vec3(-0.f,1.f,0.f))
 		->setRotation(glm::angleAxis(glm::radians(30.f), glm::vec3(0, 1, 0)))
 		->addEffect(simple);
@@ -259,6 +253,16 @@ void Game::onRender(float dt) {
 			title += "MOUSE_NEEDED";
 		} else {
 			title += "MOUSE_CLEAR";
+		}
+
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Exit")) {
+					this->setRunFlag(false);
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
 		}
 
 		// window app config

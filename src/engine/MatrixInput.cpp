@@ -73,7 +73,7 @@ void MatrixInput::setupData(const Shader* shd) const
 	// normal matrix
 	u_loc = shd->getUniformLocation(Shader::UniformLoc::m_normal);
 	if (u_loc >= 0) {
-		glm::mat3 normal = glm::mat3(model_view);
+		glm::mat3 normal = glm::mat3(cam->getViewMatrix() * model);
 		glUniformMatrix3fv(u_loc, 1, false, glm::value_ptr(normal));
 	}
 
