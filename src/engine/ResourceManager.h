@@ -82,7 +82,7 @@ public:
 		auto it = resources.find(string(name));
 
 		if (it == resources.end() && autoload) {
-			cout << "Resource not found: " << name << endl;
+			cout << "Resource not found: " << name << ", attempting to load..." << endl;
 			// welp, not found and no autoload
 			Resource* r = this->load(name);
 

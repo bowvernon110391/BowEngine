@@ -1,5 +1,7 @@
 #include "Helper.h"
 #include <stdio.h>
+#include "tinydir.h"
+
 /// <summary>
 /// readFileContent: reads the bytes of a file (from assets folder supposedly)
 /// </summary>
@@ -99,4 +101,87 @@ int Helper::getNearestPOT(int s)
         pot = pot << 1;
     }
     return pot;
+}
+
+int Helper::scanDirectory(const std::string& dir, std::vector<std::string>& output, const char** extensions) {
+
+    const std::string forbidden(".");
+    const std::string forbidden2("..");
+
+    tinydir_dir tmpDir;
+    tinydir_open(&tmpDir, dir.c_str());
+
+    while (tmpDir.has_next) {
+        tinydir_file f;
+        tinydir_readfile(&tmpDir, &f);
+
+        // if it's directory, recurse. otherwise? read more?
+        // printf("name[%s], path[%s], ext[%s], ispath(%d)\n", f.name, f.path, f.extension, f.is_dir);
+
+        std::string fname(f.name);
+
+        // skip forbidden filename
+        if (fname == forbidden || fname == forbidden2) {
+            tinydir_next(&tmpDir);
+            continue;
+        }
+
+        // recurse if we find a directory
+        if (f.is_dir) {
+            Helper::scanDirectory(std::string(f.path), output, extensions);
+        } else {
+            // add to output the path, if the extension matches?
+            if (!extensions) {
+                // no extensions provided?
+                // directly add
+                output.push_back(std::string(f.path));
+            } else {
+                // check for supported extension
+                int i=0;
+                while ( true ) {
+                    const char* ext = extensions[i];
+
+                    if (!ext)
+                        break;
+
+                    // check if it's supported, add after we find a match
+                    std::string sext = std::string(ext);
+                    if (f.extension == sext) {
+                        output.push_back(std::string(f.path));
+                        break;
+                    }
+
+                    ++i;
+                };
+            }
+        }
+
+        tinydir_next(&tmpDir);
+    }
+
+    return 0;
+}
+
+std::string Helper::stripLDirname(const std::string& path, const std::string& dirname) {
+    // if path is found in the first name, remove it?
+    auto pos = path.find_first_of(dirname + "/");   // unix
+    auto pos2 = path.find_first_of(dirname + "\\"); // windows
+    auto pos3 = path.find_first_of(dirname + ":");  // retardos
+
+    int offset = dirname.length() + 1;
+
+    if (pos != std::string::npos) {
+        return path.substr(pos + offset);
+    } else if (pos2 != std::string::npos) {
+        return path.substr(pos2 + offset);
+    } else if (pos3 != std::string::npos) {
+        return path.substr(pos3 + offset);
+    }
+    return std::string(path);
+}
+
+void Helper::stripLDirnames(std::vector<std::string>& paths, const std::string& dirname) {
+    for (int i=0; i<paths.size(); i++) {
+        paths[i] = Helper::stripLDirname(paths[i], dirname);
+    }
 }

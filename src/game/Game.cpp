@@ -34,6 +34,7 @@
 FBO* fbo;
 bool mainViewportFocused = false;
 ImVec2 viewportSize;
+std::vector<std::string> textureNames;
 
 Game::Game() {
 	cam_horzRot = 0;
@@ -159,7 +160,16 @@ void Game::onInit() {
 	// clear em
 	FBO::unbind();
 
-	assert(glGetError() == GL_NO_ERROR);
+	// scan textures dir and build filenames for texture loader
+	const char* textureExts[] = {
+		"jpg",
+		"jpeg",
+		"png",
+		"tga",
+		0
+	};
+	Helper::scanDirectory("textures", textureNames, textureExts);
+	Helper::stripLDirnames(textureNames, "textures");
 }
 
 void Game::onDestroy() {
@@ -198,9 +208,6 @@ void Game::onUpdate(float dt) {
 	m_renderer->updateTime(dt);
 	// update scene graph
 	m_scene->update(dt);
-
-	textureMgr->get("env2.jpg");
-	textureMgr->get("env.jpg");
 }
 
 void Game::onRender(float dt) {
@@ -285,14 +292,6 @@ void Game::onRender(float dt) {
 			// some texture selector?
 			static const char* currentTexture = NULL;
 			static std::string selected;
-
-			std::vector<std::string> textureNames;
-			auto& resMap = textureMgr->getResourceMap();
-			auto it = resMap.begin();
-			while (it != resMap.end()) {
-				textureNames.push_back(it->first);
-				++it;
-			}
 
 			if (ImGui::BeginCombo("Texture List", currentTexture)) {
 				for (int i = 0; i < (int)textureNames.size(); i++) {
