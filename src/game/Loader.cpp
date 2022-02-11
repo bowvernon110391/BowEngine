@@ -13,15 +13,15 @@ ShaderInput* Game::loadBasicShaderData(const char* name, void* pdata)
 }
 
 Texture2D* Game::loadTexture(const char* name, void* pdata) {
-	GLenum error;
-	error = glGetError();
-	assert(error == GL_NO_ERROR);
+	// GLenum error;
+	// error = glGetError();
+	// assert(error == GL_NO_ERROR);
 
 	// load the texture, do not set anything yet?
 	Texture2D* tex = Texture2D::loadFromFile(name, true)->withFilter(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
-	error = glGetError();
-	assert(error == GL_NO_ERROR);
+	// error = glGetError();
+	// assert(error == GL_NO_ERROR);
 
 	return tex;
 }

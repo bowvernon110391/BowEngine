@@ -84,7 +84,7 @@ Texture2D* Texture2D::loadFromMemory(const char* buf, int bufSize,
 }
 
 bool Texture2D::upload(bool retainPixelData) {
-	assert(glGetError() == GL_NO_ERROR);
+	// assert(glGetError() == GL_NO_ERROR);
 
 	if (width && height) {
 		// gen tex id
@@ -95,33 +95,33 @@ bool Texture2D::upload(bool retainPixelData) {
 #endif
 		assert(texId != 0);
 
-		assert(glGetError() == GL_NO_ERROR);
+		// assert(glGetError() == GL_NO_ERROR);
 #ifdef _DEBUG
 		SDL_Log("TEXTURE_LOAD size(%d x %d)", width, height);
 #endif
-		GLenum error;
+		// GLenum error;
 		// generate rgba by default, don't ask don't tell?
 		glBindTexture(GL_TEXTURE_2D, texId);
-		error = glGetError();
-		assert(error == GL_NO_ERROR);
+		// error = glGetError();
+		// assert(error == GL_NO_ERROR);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-		error = glGetError();
-		assert(error == GL_NO_ERROR);
+		// error = glGetError();
+		// assert(error == GL_NO_ERROR);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 
-		error = glGetError();
-		assert(error == GL_NO_ERROR);
+		// error = glGetError();
+		// assert(error == GL_NO_ERROR);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, texData);
 
-		assert(glGetError() == GL_NO_ERROR);
+		// assert(glGetError() == GL_NO_ERROR);
 		
 		if (useMipmap) {
 			generateMipMap();
-			assert(glGetError() == GL_NO_ERROR);
+			// assert(glGetError() == GL_NO_ERROR);
 		}
 
 

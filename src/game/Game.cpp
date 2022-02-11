@@ -34,6 +34,7 @@
 FBO* fbo;
 bool mainViewportFocused = false;
 ImVec2 viewportSize;
+std::vector<std::string> textureNames;
 
 Game::Game() {
 	cam_horzRot = 0;
@@ -82,16 +83,10 @@ void Game::onInit() {
 
 	// add a cube manually
 	meshMgr->put("cube", Mesh::createUnitBox()->createBufferObjects());
-	meshMgr->load("weirdcube.bcf");
-	meshMgr->load("weirdsphere.bcf");
-	meshMgr->load("sphere.bcf");
-	
-	assert(glGetError() == GL_NO_ERROR);
-	//// load textures
-	textureMgr->load("road_on_grass.png"); // ->withWrap(GL_REPEAT, GL_REPEAT);
-	assert(glGetError() == GL_NO_ERROR);
-	textureMgr->load("trimsheet_01.png");
-	assert(glGetError() == GL_NO_ERROR);
+	// meshMgr->load("weirdcube.bcf");
+	// meshMgr->load("male_char_proto.bcf");
+	// meshMgr->load("weirdsphere.bcf");
+	// meshMgr->load("sphere.bcf");
 
 	//textureMgr->get("env.jpg");
 	//textureMgr->load("env.jpg");
@@ -113,13 +108,13 @@ void Game::onInit() {
 		(new ShaderTechnique)->addPass(
 			(new RenderPass(
 				sourceMgr->get("plain.glsl"),
-				(new MaterialInput)->addTexture(textureMgr->get("trimsheet_01.png"))
+				(new MaterialInput)->addTexture(textureMgr->get("police_car.png"))
 			))->setMaterialSetting(setting)
 		)
 	);
 
 	obj = new StaticMeshObject();
-	obj->setMesh(meshMgr->get("weirdcube.bcf"))
+	obj->setMesh(meshMgr->get("police_car.bcf"))
 		->setPosition(glm::vec3(-0.f,1.f,0.f))
 		->setRotation(glm::angleAxis(glm::radians(30.f), glm::vec3(0, 1, 0)))
 		->addEffect(simple);
@@ -165,7 +160,16 @@ void Game::onInit() {
 	// clear em
 	FBO::unbind();
 
-	assert(glGetError() == GL_NO_ERROR);
+	// scan textures dir and build filenames for texture loader
+	const char* textureExts[] = {
+		"jpg",
+		"jpeg",
+		"png",
+		"tga",
+		0
+	};
+	Helper::scanDirectory("textures", textureNames, textureExts);
+	Helper::stripLDirnames(textureNames, "textures");
 }
 
 void Game::onDestroy() {
@@ -204,9 +208,6 @@ void Game::onUpdate(float dt) {
 	m_renderer->updateTime(dt);
 	// update scene graph
 	m_scene->update(dt);
-
-	textureMgr->get("env2.jpg");
-	textureMgr->get("env.jpg");
 }
 
 void Game::onRender(float dt) {
@@ -261,6 +262,16 @@ void Game::onRender(float dt) {
 			title += "MOUSE_CLEAR";
 		}
 
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Exit")) {
+					this->setRunFlag(false);
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+
 		// window app config
 		ImGui::Begin("App Config", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), "FPS: %d", fps);
@@ -281,14 +292,6 @@ void Game::onRender(float dt) {
 			// some texture selector?
 			static const char* currentTexture = NULL;
 			static std::string selected;
-
-			std::vector<std::string> textureNames;
-			auto& resMap = textureMgr->getResourceMap();
-			auto it = resMap.begin();
-			while (it != resMap.end()) {
-				textureNames.push_back(it->first);
-				++it;
-			}
 
 			if (ImGui::BeginCombo("Texture List", currentTexture)) {
 				for (int i = 0; i < (int)textureNames.size(); i++) {
