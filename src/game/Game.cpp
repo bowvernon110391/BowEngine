@@ -76,10 +76,10 @@ void Game::onInit() {
 	meshMgr = new ResourceManager<Mesh>(loadMesh, "meshes", nullptr, (void*)ctxData);
 	largeMeshMgr = new ResourceManager<LargeMesh>(loadLargeMesh, "meshes", nullptr, (void*)ctxData);
 	textureMgr = new ResourceManager<Texture2D>(loadTexture, "textures", nullptr, (void*)ctxData);
-	sourceMgr = new ResourceManager<ShaderSource>(loadShaderSource, "shaders", new ShaderSource(""), (void*)ctxData);
+	sourceMgr = new ResourceManager<ShaderSource>(loadShaderSource, "shaders", new ShaderSource("", 0), (void*)ctxData);
 
 	// load a source
-	sourceMgr->load("plain.glsl");
+	//sourceMgr->load("plain.glsl");
 
 	// add a cube manually
 	meshMgr->put("cube", Mesh::createUnitBox()->createBufferObjects());

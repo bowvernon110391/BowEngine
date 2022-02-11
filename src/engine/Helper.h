@@ -21,6 +21,8 @@ namespace Helper {
 	std::string stripLDirname(const std::string& path, const std::string& dirname);
 	// remove all leading dirname from paths
 	void stripLDirnames(std::vector<std::string>& paths, const std::string& dirname);
+	// copy string with from file buffer (add null terminator)
+	std::string stringFromFileBuffer(const char* buf, size_t bufsize);
 }
 
 

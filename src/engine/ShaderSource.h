@@ -17,7 +17,7 @@
 
 class ShaderSource : public Resource {
 public:
-	ShaderSource(const char* buf);
+	ShaderSource(const char* buf, size_t bufsize);
 
 	// Inherited via Resource
 	virtual const char* type() override;

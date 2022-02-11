@@ -131,7 +131,7 @@ protected:
 		// compile it
 		glCompileShader(shd);
 
-		// delete srouces
+		// delete sources
 		delete[] sources;
 		delete[] srclengths;
 
@@ -144,7 +144,7 @@ protected:
 		glGetShaderiv(shd, GL_INFO_LOG_LENGTH, &infoLen);
 		glGetShaderInfoLog(shd, 1024, NULL, infoLog);
 		SDL_Log("SHADER_LOG: %s\n", infoLog);
-		SDL_assert(compiled && "Shader Compilation failed!");
+		//SDL_assert(compiled && "Shader Compilation failed!");
 
 		if (!compiled) {
 			// failed, delete shader
@@ -291,7 +291,7 @@ protected:
 
 		// 1st, compile the vertex shader,
 		sources.push_back("#define VERTEX_SHADER\n");
-		sources.push_back(k.source->src);
+		sources.push_back(std::string(k.source->src));
 
 		GLuint vsId = compileShader(GL_VERTEX_SHADER, sources);
 		if (!vsId) {
@@ -303,7 +303,7 @@ protected:
 		sources.pop_back();
 		sources.pop_back();
 		sources.push_back("#define FRAGMENT_SHADER\n");
-		sources.push_back(k.source->src);
+		sources.push_back(std::string(k.source->src));
 
 		GLuint fsId = compileShader(GL_FRAGMENT_SHADER, sources);
 		if (!fsId) {

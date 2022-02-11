@@ -185,3 +185,13 @@ void Helper::stripLDirnames(std::vector<std::string>& paths, const std::string& 
         paths[i] = Helper::stripLDirname(paths[i], dirname);
     }
 }
+
+std::string Helper::stringFromFileBuffer(const char* buf, size_t bufsize) {
+    char* tmpbuf = new char[bufsize + 1];
+    memset(tmpbuf, 0, bufsize + 1);
+    memcpy(tmpbuf, buf, bufsize);
+
+    std::string ret = std::string(tmpbuf);
+    delete[] tmpbuf;
+    return ret;
+}

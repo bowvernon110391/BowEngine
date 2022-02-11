@@ -1,7 +1,8 @@
 #include "ShaderSource.h"
+#include "Helper.h"
 #include <SDL.h>
 
-ShaderSource::ShaderSource(const char* buf): src(buf)
+ShaderSource::ShaderSource(const char* buf, size_t bufsize): src(Helper::stringFromFileBuffer(buf, bufsize))
 {
     // don't delete the buf, let it bee
     queryCaps();

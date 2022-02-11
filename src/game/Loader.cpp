@@ -42,9 +42,10 @@ LargeMesh* Game::loadLargeMesh(const char* name, void* pdata)
 
 ShaderSource* Game::loadShaderSource(const char* name, void* pdata)
 {
-	char* buf = Helper::readFileContent(name);
+	size_t bufsize;
+	char* buf = Helper::readFileContent(name, &bufsize);
 
-	ShaderSource* src = new ShaderSource(buf);
+	ShaderSource* src = new ShaderSource(buf, bufsize);
 
 	delete[] buf;
 	return src;
